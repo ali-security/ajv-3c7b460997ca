@@ -1,0 +1,35 @@
+name: seal-build
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '14'
+
+      - name: Pin registry to release date
+        run: npm config set registry https://:2020-09-13T16%3A23%3A15.885Z@time-machines-npm.sealsecurity.io/
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Compile doT templates
+        run: npm run build
+
+      - name: Bundle browser dist
+        run: npm run bundle
+
+      - name: Pack tarball
+        run: npm pack
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ajv-tgz
+          path: ajv-6.12.5.tgz
+          if-no-files-found: error
